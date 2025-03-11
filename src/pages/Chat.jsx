@@ -122,7 +122,7 @@ const Chat = () => {
                 </svg>
               </div>
               <div>
-                <p className="text-white font-medium">Signed in as {session?.user?.user_metadata?.username || `AnonymousUser-${session?.user?.id.slice(0, 4)}`}</p>
+                <p className="text-white font-medium">{session?.user?.user_metadata?.username || `AnonymousUser-${session?.user?.id.slice(0, 4)}`}</p>
                 <p className="text-gray-400 text-sm">
                   <span className={`inline-block w-2 h-2 ${usersOnline.length >= 1 ? "bg-green-500" : "bg-gray-500"} rounded-full mr-2`}></span>
                   {usersOnline && usersOnline.length === 1 ? "One user online" : usersOnline.length > 1 ? `${usersOnline.length} users online` : "Offline"}
