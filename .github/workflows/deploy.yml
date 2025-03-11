@@ -38,7 +38,7 @@ jobs:
         run: vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --yes --name ephemral-chat
 
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-output
           path: ./dist
