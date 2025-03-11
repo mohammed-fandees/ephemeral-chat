@@ -1,89 +1,45 @@
-name: Deploy to GitHub Pages
+name: Build Project
 
 on:
   push:
     branches: [ master ]
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-# Allow only one concurrent deployment
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
 
 jobs:
-  # Build job
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
         
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          
-      - name: Install Vite and dependencies
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Create .env file
         run: |
-          # Create a temporary package.json if it doesn't exist
-          if [ ! -f package.json ]; then
-            echo '{"name":"temp-app","version":"0.0.1","private":true}' > package.json
-          fi
-          
-          # Install required dependencies
-          npm install --save-dev vite
-          npm install --save-dev @vitejs/plugin-react
-          
-          # Install project dependencies
-          npm install
-          
-      - name: Create Vite config
-        run: |
-          echo 'import { defineConfig } from "vite";
-          import react from "@vitejs/plugin-react";
-          
-          export default defineConfig({
-            plugins: [react()],
-            base: "/ephemeral-chat/",
-            build: {
-              outDir: "dist"
-            }
-          });' > vite.config.js
-          
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-        
-      - name: Build
-        run: |
-          # Create .env file with Supabase configuration
           echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" > .env
           echo "VITE_SUPABASE_KEY=${{ secrets.VITE_SUPABASE_KEY }}" >> .env
-          
-          # Build with environment variables
-          npx vite build
-        
-      - name: Debug directory contents
-        run: ls -la dist || echo "dist directory not found"
-        
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './dist'
 
-  # Deployment job
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Build Project
+        run: npm run build
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy to Vercel
+        run: vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --yes --name ephemral-chat
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-output
+          path: ./dist
+          
