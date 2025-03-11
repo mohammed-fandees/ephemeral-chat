@@ -45,9 +45,9 @@ const Login = () => {
 
   return (
     <Wrapper prevent="user">
-      <div className="flex h-screen justify-center items-center bg-gradient-to-br from-blue-900 via-gray-900 to-gray-900 p-2">
+      <div className="flex h-screen justify-center items-center bg-gradient-to-br from-blue-900 via-gray-900 to-gray-900 p-[15px]">
         <Toaster position='top-center' reverseOrder={false} />
-        <div className="w-full max-w-md px-8 py-10 bg-white/10 backdrop-blur-md rounded-2xl shadow-xl border border-white/20">
+        <div className="w-full max-w-md px-5 sm:px-8 py-10 bg-white/10 backdrop-blur-md rounded-2xl shadow-xl border border-white/20">
           {/* Header */}
           <div className="mb-8 text-center">
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 mb-4">
