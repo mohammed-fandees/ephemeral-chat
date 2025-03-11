@@ -11,6 +11,7 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [usersOnline, setusersOnline] = useState([]);
   const { session } = useContext(SessionContext);
+  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
 
   const chatContainerRef = useRef(null);
    
@@ -53,10 +54,62 @@ const Chat = () => {
     
   }, [session]);
 
+  // Handle window resize and viewport changes for mobile devices
+  useEffect(() => {
+    // Function to check if the device is mobile
+    const isMobile = () => {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    };
+
+    // Only apply these listeners on mobile devices
+    if (isMobile()) {
+      const handleResize = () => {
+        setWindowHeight(window.innerHeight);
+      };
+
+      const handleVisualViewportResize = () => {
+        if (window.visualViewport) {
+          setWindowHeight(window.visualViewport.height);
+          
+          // Adjust the chat container style for mobile when keyboard is open
+          if (chatContainerRef.current) {
+            const isKeyboardOpen = window.innerHeight > window.visualViewport.height + 150; // Threshold to detect keyboard
+            
+            if (isKeyboardOpen) {
+              chatContainerRef.current.style.height = 'auto';
+              chatContainerRef.current.style.maxHeight = 'none';
+              chatContainerRef.current.style.minHeight = 'auto';
+            } else {
+              // Reset to default when keyboard is closed
+              chatContainerRef.current.style.height = '';
+              chatContainerRef.current.style.maxHeight = '';
+              chatContainerRef.current.style.minHeight = '';
+            }
+          }
+        }
+      };
+
+      window.addEventListener('resize', handleResize);
+      
+      // Use visualViewport API if available (better for handling keyboard)
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', handleVisualViewportResize);
+      }
+
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        if (window.visualViewport) {
+          window.visualViewport.removeEventListener('resize', handleVisualViewportResize);
+        }
+      };
+    }
+  }, []);
+
   // Send Message
 
   const sendMessage = async (e) => {
     e.preventDefault();
+    if(!message) return; // to prevent empty message
 
     try {
       supabase.channel("room_one").send({
@@ -121,6 +174,19 @@ const Chat = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
+          
+          {/* Responsive styles for mobile */}
+          <style jsx>
+            {`
+              @media (max-width: 640px) {
+                .chat-area {
+                  height: auto !important;
+                  max-height: none !important;
+                  min-height: auto !important;
+                }
+              }
+            `}
+          </style>
               <div>
                 <p className="text-white font-medium">{session?.user?.user_metadata?.username || `AnonymousUser-${session?.user?.id.slice(0, 4)}`}</p>
                 <p className="text-gray-400 text-sm">
@@ -146,15 +212,16 @@ const Chat = () => {
             </button>
           </div>
 
-          {/* Main Chat Area */}
-          <div ref={chatContainerRef} className="chat-area flex-1 overflow-y-auto p-4 space-y-4" style={{  height: "calc(100vh - 295px)", maxHeight: "calc(100vh - 295px)", minHeight: "calc(100vh - 295px)" }}>
-          <style>
-            {`
-              @media (max-width: 640px) {
-                .chat-area { min-height: calc(100vh - 160px) !important; }
-              }
-            `}
-          </style>
+          {/* Main Chat Area - fixed height on desktop, responsive on mobile */}
+          <div 
+            ref={chatContainerRef} 
+            className="chat-area flex-1 overflow-y-auto p-4 space-y-4"
+            style={{ 
+              height: "calc(100vh - 295px)", 
+              maxHeight: "calc(100vh - 295px)", 
+              minHeight: "calc(100vh - 295px)" 
+            }}
+          >
             {messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.isMine ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-xs md:max-w-md lg:max-w-lg rounded-lg px-4 py-2 shadow-md ${msg.isMine
