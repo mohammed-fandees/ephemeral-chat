@@ -63,7 +63,7 @@ jobs:
         run: |
           # Create .env file with Supabase configuration
           echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" > .env
-          echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_KEY }}" >> .env
+          echo "VITE_SUPABASE_KEY=${{ secrets.VITE_SUPABASE_KEY }}" >> .env
           
           # Build with environment variables
           npx vite build
