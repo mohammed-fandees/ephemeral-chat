@@ -31,8 +31,7 @@ jobs:
         uses: actions/configure-pages@v4
         
       - name: Ensure dependencies
-        run: |
-          node update-package-json.js
+        run:
           npm install
         
       - name: Build
